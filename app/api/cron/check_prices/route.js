@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { scrapeProduct } from "@/lib/firecrawl";
 import { sendPriceDropAlert } from "@/lib/email";
+import { createClient } from "@supabase/supabase-js";
+
 
 export async function GET() {
     return NextResponse.json({
@@ -23,10 +25,13 @@ export async function POST(request) {
       process.env.NEXT_PUBLIC_SUPABASE_URL,
       process.env.SUPABASE_SERVICE_ROLE_KEY
     );
+    
 
     const { data: products, error: productsError } = await supabase
       .from("products")
       .select("*");
+      
+  
      
       if (productsError) throw productsError;
 
@@ -79,7 +84,7 @@ export async function POST(request) {
              if (user?.email) {
               //send email
               const emailResult = await sendPriceDropAlert(
-              user.Email,
+              user.email,
               product,
               oldPrice,
               newPrice );
@@ -112,3 +117,8 @@ export async function POST(request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
     }
+
+  //  curl.exe -X POST https://dealdrop-seven.vercel.app/api/cron/check_prices -H "Authorization: Bearer 9d1a9d9bd3ea8c727734f08f3ef446bdd13af7472eae0487e811b4aa26e602b1"
+
+
+
